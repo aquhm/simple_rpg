@@ -16,6 +16,7 @@ namespace Client.Actor
         private void Awake()
         {
             _animationEventHandler ??= gameObject.GetOrAddComponent<AnimationEventHandler>();
+            _equipmentRefs ??= gameObject.GetOrAddComponent<ActorEquipmentReferences>();
         }
 
         public ActorEquipmentReferences EquipmentRefs

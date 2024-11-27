@@ -25,7 +25,6 @@ namespace Client.Actor
         public void Initialize()
         {
             InitializeEquipments();
-
             InitializeRx();
 
             IsActive = true;
@@ -83,6 +82,18 @@ namespace Client.Actor
 
         private void HandleShieldState(EquipmentAction action)
         {
+            switch (action)
+            {
+                case EquipmentAction.Active:
+                    ShowEquipment("ShieldHand");
+                    HideEquipment("ShieldBack");
+                    break;
+
+                case EquipmentAction.Deactive:
+                    ShowEquipment("ShieldBack");
+                    HideEquipment("ShieldHand");
+                    break;
+            }
         }
 
         public void ShowEquipment(string equipmentId)
@@ -123,6 +134,11 @@ namespace Client.Actor
 
         private void InitializeEquipments()
         {
+            if (IsActive)
+            {
+                return;
+            }
+
             var equipmentRefs = _view.EquipmentRefs;
             if (equipmentRefs == null)
             {

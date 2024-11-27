@@ -48,9 +48,5 @@ namespace Client.Actor
 
             return actorController;
         }
-
-        protected override void SetupSpecificBindings()
-        {
-        }
     }
 }

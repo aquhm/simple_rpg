@@ -6,10 +6,7 @@ namespace Client.Actor
     {
         CharacterController CharacterController { get; }
         Animator Animator { get; }
-
         Transform Transform { get; }
-
-        //GroundCheckInfo GroundCheckInfo { get; }
         ActorSettings Settings { get; }
         ActorEquipmentReferences EquipmentRefs { get; }
     }

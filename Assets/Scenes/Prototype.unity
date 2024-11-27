@@ -3500,7 +3500,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 951822748}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.022883868, y: 0.08664028, z: -0.0019906776, w: 0.99597484}
+  m_LocalRotation: {x: 0.022905236, y: 0.075203374, z: -0.0017279015, w: 0.99690366}
   m_LocalPosition: {x: 0, y: 1.6800001, z: -3.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4941,7 +4941,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1418545605}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.022883868, y: 0.08664028, z: -0.0019906778, w: 0.99597484}
+  m_LocalRotation: {x: 0.022905238, y: 0.07520338, z: -0.0017279014, w: 0.99690366}
   m_LocalPosition: {x: 0, y: 1.6800001, z: -3.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -10586,6 +10586,10 @@ MonoBehaviour:
     gameObject: {fileID: 1899714505}
   - id: SwordHand
     gameObject: {fileID: 1016005723}
+  - id: ShieldBack
+    gameObject: {fileID: 725925038}
+  - id: ShieldHand
+    gameObject: {fileID: 1709486938}
 --- !u!4 &8216470192398021655
 Transform:
   m_ObjectHideFlags: 0

@@ -113,46 +113,6 @@ namespace Client.Actor.Animation
                        .AddTo(_disposables);
         }
 
-        private void SetupInputBindings()
-        {
-            // 이동 애니메이션
-            _inputStateModel.Move
-                            .Subscribe(moveInput =>
-                            {
-                                var isMoving = moveInput.magnitude >= MOVEMENT_THRESHOLD;
-                                var isSprinting = _inputStateModel.IsSprinting.Value;
-
-                                SetBool(Walking, isMoving && !isSprinting);
-                                SetBool(Running, isMoving && isSprinting);
-                            })
-                            .AddTo(_disposables);
-
-
-            // 점프 애니메이션
-            _inputStateModel.Jump
-                            .Subscribe(isJumping => SetBool(Jump, isJumping))
-                            .AddTo(_disposables);
-
-            // 방어 애니메이션
-            _inputStateModel.IsDefending
-                            .Subscribe(isDefending =>
-                            {
-                                SetBool("shield", isDefending);
-                                SetLayerWeight(COMBAT_LAYER, isDefending ? 1 : 0);
-
-                                if (!isDefending)
-                                {
-                                    SetTrigger("saveSword");
-                                }
-                            })
-                            .AddTo(_disposables);
-
-            // 공격 애니메이션
-            _inputStateModel.IsAttacking
-                            .Where(isAttacking => isAttacking && _inputStateModel.IsDefending.Value)
-                            .Subscribe(_ => SetTrigger("sword"))
-                            .AddTo(_disposables);
-        }
 
         private void SetupAnimationCallbacks()
         {
@@ -163,41 +123,36 @@ namespace Client.Actor.Animation
                 return;
             }
 
-            // 점프 시작
-            trigger.OnStateEnterAsObservable()
-                   .Where(state => state.StateInfo.IsName("Normal.Jump"))
-                   .Subscribe(_ => OnJumpAnimationEnter())
-                   .AddTo(_triggerDisposables);
-
-            trigger.OnStateEnterAsObservable().Subscribe(x =>
+            trigger.OnStateEnterAsObservable().Subscribe(state =>
             {
+                OnStateEnter(state.StateInfo);
             }).AddTo(_triggerDisposables);
 
-            trigger.OnStateExitAsObservable().Subscribe(x =>
+            trigger.OnStateExitAsObservable().Subscribe(state =>
             {
+                OnStateExit(state.StateInfo);
             }).AddTo(_triggerDisposables);
-
-            // 점프 종료
-            trigger.OnStateExitAsObservable()
-                   .Where(state => state.StateInfo.IsName("Normal.Jump"))
-                   .Subscribe(_ => OnJumpAnimationExit())
-                   .AddTo(_triggerDisposables);
-
-            // 공격 애니메이션 완료 감지
-            trigger.OnStateExitAsObservable()
-                   .Where(state => state.StateInfo.IsName("SwordAndShield.Attack"))
-                   .Subscribe(_ => _stateModel?.SetAttackState(ComboState.None))
-                   .AddTo(_triggerDisposables);
-
-            trigger.OnStateExitAsObservable()
-                   .Where(state => state.StateInfo.IsName("SwordAndShield.GetSword"))
-                   .Subscribe(_ =>
-                   {
-                       SetBool(InCombat, _stateModel.IsInCombatMode.Value);
-                   })
-                   .AddTo(_triggerDisposables);
         }
 
+        private void OnStateEnter(AnimatorStateInfo stateInfo)
+        {
+            switch (stateInfo)
+            {
+                case { } when stateInfo.IsName("Normal.Jump"):
+                    OnJumpAnimationEnter();
+                    break;
+            }
+        }
+
+        private void OnStateExit(AnimatorStateInfo stateInfo)
+        {
+            switch (stateInfo)
+            {
+                case { } when stateInfo.IsName("Normal.Jump"):
+                    OnJumpAnimationExit();
+                    break;
+            }
+        }
 
         private void SetAnimatorMode(bool isInCombatMode)
         {
@@ -211,49 +166,63 @@ namespace Client.Actor.Animation
 
             RestoreParameters(parameterValues);
             SetupAnimationCallbacks();
+
+            if (isInCombatMode == false)
+            {
+                SetTrigger("saveSword");
+            }
         }
 
-        private Dictionary<string, object> SaveCurrentParameters()
+        private AnimatorParameterCache SaveCurrentParameters()
         {
-            var parameters = new Dictionary<string, object>();
+            var cache = new AnimatorParameterCache();
 
             foreach (var parameter in _animator.parameters)
             {
                 switch (parameter.type)
                 {
                     case AnimatorControllerParameterType.Bool:
-                        parameters[parameter.name] = _animator.GetBool(parameter.nameHash);
+                        cache.BoolParameters[parameter.nameHash] = _animator.GetBool(parameter.nameHash);
                         break;
                     case AnimatorControllerParameterType.Int:
-                        parameters[parameter.name] = _animator.GetInteger(parameter.nameHash);
+                        cache.IntParameters[parameter.nameHash] = _animator.GetInteger(parameter.nameHash);
                         break;
                     case AnimatorControllerParameterType.Float:
-                        parameters[parameter.name] = _animator.GetFloat(parameter.nameHash);
+                        cache.FloatParameters[parameter.nameHash] = _animator.GetFloat(parameter.nameHash);
                         break;
                 }
             }
 
-            return parameters;
+            return cache;
         }
 
-        private void RestoreParameters(Dictionary<string, object> parameters)
+        private void RestoreParameters(AnimatorParameterCache cache)
         {
             foreach (var parameter in _animator.parameters)
             {
-                if (parameters.TryGetValue(parameter.name, out var value))
+                switch (parameter.type)
                 {
-                    switch (parameter.type)
-                    {
-                        case AnimatorControllerParameterType.Bool:
-                            _animator.SetBool(parameter.nameHash, (bool)value);
-                            break;
-                        case AnimatorControllerParameterType.Int:
-                            _animator.SetInteger(parameter.nameHash, (int)value);
-                            break;
-                        case AnimatorControllerParameterType.Float:
-                            _animator.SetFloat(parameter.nameHash, (float)value);
-                            break;
-                    }
+                    case AnimatorControllerParameterType.Bool:
+                        if (cache.BoolParameters.TryGetValue(parameter.nameHash, out var boolValue))
+                        {
+                            _animator.SetBool(parameter.nameHash, boolValue);
+                        }
+
+                        break;
+                    case AnimatorControllerParameterType.Int:
+                        if (cache.IntParameters.TryGetValue(parameter.nameHash, out var intValue))
+                        {
+                            _animator.SetInteger(parameter.nameHash, intValue);
+                        }
+
+                        break;
+                    case AnimatorControllerParameterType.Float:
+                        if (cache.FloatParameters.TryGetValue(parameter.nameHash, out var floatValue))
+                        {
+                            _animator.SetFloat(parameter.nameHash, floatValue);
+                        }
+
+                        break;
                 }
             }
         }
@@ -353,6 +322,13 @@ namespace Client.Actor.Animation
         }
 
 #endregion
+
+        private class AnimatorParameterCache
+        {
+            public Dictionary<int, bool> BoolParameters { get; } = new();
+            public Dictionary<int, int> IntParameters { get; } = new();
+            public Dictionary<int, float> FloatParameters { get; } = new();
+        }
 
 #region Animation Parameter Methods
 

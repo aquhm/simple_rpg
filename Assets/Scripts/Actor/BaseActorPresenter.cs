@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using UniRx;
 
 namespace Client.Actor
@@ -27,9 +28,7 @@ namespace Client.Actor
 
         public virtual void Initialize()
         {
-            InitializeControllers();
-            SetupBaseBindings();
-            SetupSpecificBindings();
+            InternalInitialize().Forget();
         }
 
         public virtual void Update()
@@ -51,9 +50,12 @@ namespace Client.Actor
             _controllers.Clear();
         }
 
-        protected virtual void SetupBaseBindings()
+        private async UniTaskVoid InternalInitialize()
         {
+            await UniTask.Yield();
+            InitializeControllers();
         }
+
 
         public T GetController<T>() where T : class, IActorController
         {
@@ -62,6 +64,5 @@ namespace Client.Actor
         }
 
         protected abstract void InitializeControllers();
-        protected abstract void SetupSpecificBindings();
     }
 }

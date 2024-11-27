@@ -26,10 +26,10 @@ namespace Client.Actor
         [Header("Equipment Objects")]
         [SerializeField] private EquipmentReference[] _equipments;
 
+
         public Dictionary<string, Transform> Points { get; private set; }
 
         public Dictionary<string, GameObject> Equipments { get; private set; }
-
 
         private void Awake()
         {

@@ -50,6 +50,15 @@ namespace Client.Actor
                     case "ActiveSword":
                         _localModel.EquipmentStateModel.SetEquipmentState(EquipmentType.Sword, EquipmentAction.Active);
                         break;
+                    case "ActiveShield":
+                        _localModel.EquipmentStateModel.SetEquipmentState(EquipmentType.Shield, EquipmentAction.Active);
+                        break;
+                    case "DeactiveSword":
+                        _localModel.EquipmentStateModel.SetEquipmentState(EquipmentType.Sword, EquipmentAction.Deactive);
+                        break;
+                    case "DeactiveShield":
+                        _localModel.EquipmentStateModel.SetEquipmentState(EquipmentType.Shield, EquipmentAction.Deactive);
+                        break;
                 }
             }
         }
